@@ -1,6 +1,7 @@
 class Restaurant < ActiveRecord::Base
 
   has_many :reviews, -> { extending WithUserAssociationExtension }, dependent: :destroy
+  belongs_to :user
 
   validates :name, length: { minimum: 3 }, uniqueness: true
 
@@ -9,4 +10,9 @@ class Restaurant < ActiveRecord::Base
   #   review.user = current_user
   #   review
   # end
+
+  def owned_by?(current_user)
+    current_user.restaurants.include?(self)
+  end
+
 end
