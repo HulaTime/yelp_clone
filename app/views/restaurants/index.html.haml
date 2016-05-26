@@ -2,6 +2,7 @@
   - @restaurants.each do |restaurant|
     %h2= link_to restaurant.name, restaurant_path(restaurant)
     %h4= restaurant.description
+    %h3 Average Rating: #{restaurant.average_rating.to_f}
 
     - restaurant.reviews.each do |review|
       %h5= review.thoughts

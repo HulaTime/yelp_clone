@@ -24,19 +24,10 @@ feature 'restaurants' do
   context 'creating restaurants' do
     context 'when user is logged in' do
       before do
-        visit('/')
-        click_link('Sign up')
-        fill_in('Email', with: 'test@example.com')
-        fill_in('Password', with: 'testtest')
-        fill_in('Password confirmation', with: 'testtest')
-        click_button('Sign up')
+        sign_user_up
       end
       scenario 'displays the new restaurant and adds to users restaurants' do
-        visit '/restaurants'
-        click_link 'Add a restaurant'
-        fill_in 'Name', with: 'KFC'
-        fill_in 'Description', with: 'The greatest chicken EVER.'
-        click_button 'Create Restaurant'
+        create_restaurant
         expect(page).to have_content 'KFC'
         expect(current_path).to eq '/restaurants'
         user = User.find_by(email: 'test@example.com')
@@ -44,9 +35,7 @@ feature 'restaurants' do
       end
       context 'an invalid restaurant' do
         it 'does not let you submit a name that is too short' do
-          visit '/restaurants'
-          click_link 'Add a restaurant'
-          fill_in 'Name', with: 'kf'
+          create_restaurant(name: 'kf')
           click_button 'Create Restaurant'
           expect(page).not_to have_css 'h2', text: 'kf'
           expect(page).to have_content 'error'
@@ -76,17 +65,8 @@ feature 'restaurants' do
 
   context 'editing restaurants' do
     before do
-      visit('/')
-      click_link('Sign up')
-      fill_in('Email', with: 'test@example.com')
-      fill_in('Password', with: 'testtest')
-      fill_in('Password confirmation', with: 'testtest')
-      click_button('Sign up')
-      visit '/restaurants'
-      click_link 'Add a restaurant'
-      fill_in 'Name', with: 'KFC'
-      fill_in 'Description', with: 'The greatest chicken EVER.'
-      click_button 'Create Restaurant'
+      sign_user_up
+      create_restaurant
     end
     scenario 'let a logged in user edit their own restaurant' do
      visit '/restaurants'
@@ -102,12 +82,7 @@ feature 'restaurants' do
     scenario 'a user cannnot edit someone elses restaurant' do
       visit '/restaurants'
       click_link 'Sign out'
-      visit('/')
-      click_link('Sign up')
-      fill_in('Email', with: 'test2@example.com')
-      fill_in('Password', with: 'testtest')
-      fill_in('Password confirmation', with: 'testtest')
-      click_button "Sign up"
+      sign_user_up(email: 'test2@example.com')
       click_link('Edit KFC')
       expect(current_path).to eq '/restaurants'
       expect(page).to have_content 'Error: Can only edit your own restaurant'
@@ -117,17 +92,8 @@ feature 'restaurants' do
 
   context 'deleting restaurants' do
     before do
-      visit('/')
-      click_link('Sign up')
-      fill_in('Email', with: 'test@example.com')
-      fill_in('Password', with: 'testtest')
-      fill_in('Password confirmation', with: 'testtest')
-      click_button('Sign up')
-      visit '/restaurants'
-      click_link 'Add a restaurant'
-      fill_in 'Name', with: 'KFC'
-      fill_in 'Description', with: 'The greatest chicken EVER.'
-      click_button 'Create Restaurant'
+      sign_user_up
+      create_restaurant
     end
     scenario 'removes a restaurant when a user clicks a delete link' do
       visit '/restaurants'
@@ -138,14 +104,8 @@ feature 'restaurants' do
     end
 
     scenario 'a user cannnot delete someone elses restaurant' do
-      visit '/restaurants'
       click_link 'Sign out'
-      visit('/')
-      click_link('Sign up')
-      fill_in('Email', with: 'test2@example.com')
-      fill_in('Password', with: 'testtest')
-      fill_in('Password confirmation', with: 'testtest')
-      click_button "Sign up"
+      sign_user_up(email: 'test2@example.com')
       click_link('Delete KFC')
       expect(current_path).to eq '/restaurants'
       expect(page).to have_content 'Error: Can only delete your own restaurant'
